@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [users, setUsers] = useState([]);
-  const [transactions, setTransactions] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users");
   const [editingUser, setEditingUser] = useState(null);
