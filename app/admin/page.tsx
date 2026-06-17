@@ -9,7 +9,7 @@ export default function AdminPanel() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users");
-  const [editingUser, setEditingUser] = useState(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [newBalance, setNewBalance] = useState("");
   const [newProfit, setNewProfit] = useState("");
   const [saveMsg, setSaveMsg] = useState("");
