@@ -16,7 +16,7 @@ function generatePriceHistory(basePrice, trend = "up", days = 30) {
   return prices;
 }
 
-const STOCKS = [
+const STOCKS_BASE = [
   { name: "Tesla", symbol: "TSLA", price: 358.90, change: "+4.12%", positive: true, color: "#e11d48", bg: "#1a0a0d", domain: "tesla.com", volume: "98.4M", marketCap: "Large Cap", week52High: 488.54, week52Low: 138.80, history: generatePriceHistory(358.90, "up") },
   { name: "Apple", symbol: "AAPL", price: 221.30, change: "+1.20%", positive: true, color: "#a0a0a0", bg: "#111", domain: "apple.com", volume: "54.2M", marketCap: "Large Cap", week52High: 237.23, week52Low: 164.08, history: generatePriceHistory(221.30, "up") },
   { name: "Nvidia", symbol: "NVDA", price: 1138.60, change: "+6.80%", positive: true, color: "#22c55e", bg: "#0a1a0d", domain: "nvidia.com", volume: "41.7M", marketCap: "Large Cap", week52High: 1255.87, week52Low: 560.00, history: generatePriceHistory(1138.60, "up") },
@@ -132,6 +132,39 @@ export default function Dashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [watchlist, setWatchlist] = useState([]);
   const [stockFilter, setStockFilter] = useState("all");
+  const [stocks, setStocks] = useState(STOCKS_BASE);
+
+  // Fetch live prices from Finnhub (via our own /api/quote route, which
+  // keeps the API key server-side) and merge them into the static stock data.
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchLivePrices = async () => {
+      const updated = await Promise.all(
+        STOCKS_BASE.map(async (stock) => {
+          try {
+            const res = await fetch(`/api/quote?symbol=${stock.symbol}`);
+            const data = await res.json();
+            if (!data || typeof data.c !== "number" || data.c === 0) return stock;
+            const changePct = data.dp ?? 0;
+            return {
+              ...stock,
+              price: data.c,
+              change: `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%`,
+              positive: changePct >= 0,
+            };
+          } catch {
+            return stock; // fall back to static data if a single symbol fails
+          }
+        })
+      );
+      if (!cancelled) setStocks(updated);
+    };
+
+    fetchLivePrices();
+    const interval = setInterval(fetchLivePrices, 60000); // refresh every 60s
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
 
   const loadData = async (userId) => {
     const { data: p } = await supabase.from("profiles").select("*").eq("id", userId).single();
@@ -218,14 +251,14 @@ export default function Dashboard() {
 
   const totalBalance = (profile?.balance || 0) + (profile?.profit || 0);
   const profitPositive = (profile?.profit || 0) >= 0;
-  const portfolioValue = holdings.reduce((sum, h) => { const s = STOCKS.find(s => s.symbol === h.symbol); return sum + (s ? s.price * h.shares : 0); }, 0);
+  const portfolioValue = holdings.reduce((sum, h) => { const s = stocks.find(s => s.symbol === h.symbol); return sum + (s ? s.price * h.shares : 0); }, 0);
   const portfolioCost = holdings.reduce((sum, h) => sum + (h.avg_buy_price * h.shares), 0);
   const portfolioPnL = portfolioValue - portfolioCost;
   const portfolioPnLPos = portfolioPnL >= 0;
-  const filteredStocks = stockFilter === "watchlist" ? STOCKS.filter(s => watchlist.includes(s.symbol))
-    : stockFilter === "gainers" ? STOCKS.filter(s => s.positive)
-      : stockFilter === "losers" ? STOCKS.filter(s => !s.positive)
-        : STOCKS;
+  const filteredStocks = stockFilter === "watchlist" ? stocks.filter(s => watchlist.includes(s.symbol))
+    : stockFilter === "gainers" ? stocks.filter(s => s.positive)
+      : stockFilter === "losers" ? stocks.filter(s => !s.positive)
+        : stocks;
 
   const inputStyle = { width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "11px 14px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box" };
   const cardStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "20px" };
@@ -416,7 +449,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                   {holdings.map((holding, i) => {
-                    const stock = STOCKS.find(s => s.symbol === holding.symbol);
+                    const stock = stocks.find(s => s.symbol === holding.symbol);
                     if (!stock) return null;
                     const pnl = (stock.price - holding.avg_buy_price) * holding.shares;
                     const pnlPct = ((pnl / (holding.avg_buy_price * holding.shares)) * 100).toFixed(2);
