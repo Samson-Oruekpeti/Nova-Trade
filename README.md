@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
+NovaTrade
+A full-stack investment platform built with Next.js and Supabase, supporting user portfolio management, deposits/withdrawals, and admin oversight.
+Features
+	•	Role-based authentication — separate flows and permissions for regular users and admins
+	•	Portfolio tracking — real-time holdings view for each user
+	•	Deposit & withdrawal flows — end-to-end request and processing pipeline
+	•	Admin dashboard — manage users, review transactions, monitor platform activity
+	•	Row-Level Security (RLS) — Supabase policies enforce data access at the database level, not just the UI
+Tech Stack
+	•	Framework: Next.js
+	•	Database & Auth: Supabase (Postgres, RLS, Auth)
+	•	Hosting: Vercel
+Getting Started
+Clone the repo and install dependencies:
+git clone https://github.com/Samson-Oruekpeti/novatrade.git
+cd novatrade
+npm install
+Set up your environment variables (see .env.example):
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+Run the dev server:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open http://localhost:3000 to view it locally.
+Security Notes
+This app handles financial data. RLS policies are enforced on all user-facing tables, and server-side checks guard any route touching deposits, withdrawals, or admin actions. The service role key is never exposed to the client.
+Status
+Actively developed. not yet open for external contributions.
