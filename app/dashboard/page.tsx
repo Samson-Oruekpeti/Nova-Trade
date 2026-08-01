@@ -178,7 +178,7 @@ export default function Dashboard() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/"); return; }
+      if (!user) { router.push("/login"); return; }
       await loadData(user.id);
       const { data: settings } = await supabase.from("settings").select("value").eq("key", "btc_wallet").single();
       if (settings?.value) setBtcWallet(settings.value);
@@ -239,7 +239,7 @@ export default function Dashboard() {
     await loadData(user.id);
   };
 
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/"); };
+  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/login"); };
   const copyToClipboard = (text) => { navigator.clipboard.writeText(text); alert("Address copied!"); };
   const switchTab = (tab) => { setActiveTab(tab); setMobileMenuOpen(false); };
 

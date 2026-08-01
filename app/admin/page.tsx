@@ -21,7 +21,7 @@ export default function AdminPanel() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/"); return; }
+      if (!user) { router.push("/login"); return; }
       const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
       if (!profile?.is_admin) { router.push("/dashboard"); return; }
       await loadData();
@@ -131,7 +131,7 @@ export default function AdminPanel() {
     setTimeout(() => setWalletMsg(""), 3000);
   };
 
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/"); };
+  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/login"); };
 
   if (loading) return <div style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: "DM Sans, sans-serif" }}>Loading admin panel...</div>;
 
